@@ -1,0 +1,38 @@
+-- Employee table
+
+CREATE TABLE employee (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES auth_user(id),
+    employee_id WARCHAR(20)
+    Department VARCHAR(100)
+);
+
+-- Candidate Profile
+CREATE TABLE candidate_profile (
+    id SERIAL PRIMARY KEY,
+    full_name VARCHAR(255) NOT NULL,
+    title VARCHAR (255) NOT NULL,
+    location VARCHAR(100) NOT NULL,
+    emailVARCHAR(254) NOT NULL,
+    internal_employee_id VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+):
+
+-- Profile Summary
+CREATE TABLE profile_summary (
+    id serial PRIMARY KEY,
+    candidate_id INTEGER REFERENCES candidate_profile(id) ON DELETE CASCADE,
+    summary_html TEXT NOT NULL,
+    written_by_id INTEGER REFERENCES employee(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+):
+
+--PDF Export (optional)
+CREATE TABLE pdf_export (
+    id SERIAL PRIMARY KEY,
+    candidate_id INTEGER REFERENCES candidate_profile(id) ON DELETE CASCADE
+    generated_by_id INTEGER REFERENCES employee(id)
+    file_path VARCHAR(255) NOT NULL
+    generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
