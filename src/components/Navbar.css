@@ -1,0 +1,51 @@
+
+.custom-navbar {
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.5)
+  ); 
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+
+
+.logo {
+  top: 20px;
+  left: 20px;
+  width: 130px; 
+  height: auto;
+  z-index: 10;
+}
+
+.heading {
+    font-family: Montserrat; 
+    font-size: 25px;
+  font-weight: 900;
+  color: #36487c;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+
+.profile-icon {
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+@media only screen and (max-width: 1150px) {
+    .logo {
+        width: 100px;
+    }
+    .heading{
+        font-size: 20px;
+    }
+    .profile-icon{
+        height: 40px;
+        width: 40px;
+    }
+}
