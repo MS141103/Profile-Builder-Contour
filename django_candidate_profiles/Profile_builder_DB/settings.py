@@ -41,12 +41,16 @@ TEMPLATES = [
     },
 ]
 
-ROOT_URLCONF = 'myproject.urls'
+ROOT_URLCONF = 'Profile_builder_DB.urls'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'candidate_profiles_db',
+        'USER': 'postgres',
+        'PASSWORD': 'Jagdpanther8.8CMKWK',
+        'HOST': 'localhost',
+        'PORT': '5432',  # default PostgreSQL port
     }
 }
 
