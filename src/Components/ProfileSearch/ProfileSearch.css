@@ -1,0 +1,93 @@
+.profile-search-title {
+  background-color: #24b6ae;
+  color: white;
+  width: fit-content;
+  padding: 15px 25px 15px 25px;
+  border-radius: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2%;
+}
+
+.search-bar {
+  background-color: #e5f7f7;
+  height: 8.5vh;
+  width: 65%;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  border: none;
+  border-radius: 50px;
+  margin-top: 2.5%;
+  padding-left: 30px;
+  font-family: "Ubuntu";
+  color: #4a4a4a;
+  font-weight: 500;
+}
+
+.card-pfp {
+  background-color: white;
+  border: 3.5px solid white;
+  border-radius: 50px;
+  height: 7vh;
+  width: 7vh;
+}
+
+.tags-section {
+  display: flex;
+  justify-content: space-between;
+  margin-left: auto;
+  margin-right: auto;
+  width: 63%;
+  margin-top: 1.5%;
+}
+
+.tags-title {
+  font-size: 16px;
+  color: white;
+  background-color: #24b6ae;
+  border-radius: 50px;
+  padding: 9px 25px 9px 25px;
+  font-weight: 500;
+}
+
+.tags {
+  background-color: #e5f7f7;
+  width: 11vh;
+  padding: 10px;
+  border-radius: 50px;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.profile-list {
+  width: 65%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2%;
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
+}
+
+.profile-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.profile-cards {
+  height: 20vh;
+  width: 25%;
+  border-radius: 30px;
+  background-color: #e5f7f7;
+  display: flex;
+  padding: 17px 30px;
+}
+
+.card-title {
+  font-size: 18px;
+  color: #4a4a4a;
+  margin-left: auto;
+  margin-right: auto;
+}
