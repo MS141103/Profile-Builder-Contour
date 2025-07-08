@@ -3,7 +3,7 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa #download dependecies
 from .models import CandidateProfile
 from rest_framework import viewsets
-from .apps import CandidateProfileSerializer
+from .serializers import CandidateProfileSerializer
 from .models import CandidateProfile
 from reversion.models import Version
 

@@ -1,17 +1,12 @@
 
 from django.apps import AppConfig
 import reversion
-from rest_framework import serializers
-from .models import CandidateProfile
 
 class ProfilesConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'profiles'
 
-class CandidateProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CandidateProfile
-        fields = '__all__'
+
         
     '''def ready(self):
         from . import models
