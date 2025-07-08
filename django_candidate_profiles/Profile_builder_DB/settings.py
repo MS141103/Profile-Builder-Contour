@@ -1,9 +1,12 @@
 from pathlib import Path
-
+import os
 # defines BASE_DIR as root of project (Django will know where db.sqlite 3 should be saved)
 BASE_DIR = Path(__file__).resolve().parent.parent #needed if you are running SQLLITE3
 
+ALLOWED_HOSTS = ["*"]
+
 INSTALLED_APPS = [
+    'rest_framework'
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -59,3 +62,4 @@ DEBUG = True
 ALLOWED_HOSTS = []
 # used to serve CSS, for now keep STATIC_URL = '/static/'
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
