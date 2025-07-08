@@ -3,8 +3,8 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa #download dependecies
 from .models import CandidateProfile
 from rest_framework import viewsets
+from .apps import CandidateProfileSerializer
 from .models import CandidateProfile
-from rest_framework .serializers import CandidateProfileSerializer
 from reversion.models import Version
 
 class CandidateProfileViewSet(viewsets.ModelViewSet):
