@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import { saveAs } from "file-saver";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -19,6 +18,13 @@ import { PiTextAlignCenterBold } from "react-icons/pi";
 import { PiTextAlignRightBold } from "react-icons/pi";
 
 function CreateProfile() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [title, setTitle] = useState("");
+  const [department, setDepartment] = useState("");
+  const [employeeId, setEmployeeId] = useState("");
+  const [location, setLocation] = useState("");
+  const [profilePicture, setProfilePicture] = useState(null);
   const [fontSize, setFontSize] = useState("16px");
   const fileInputRef = useRef(null);
   const editor = useEditor({
@@ -43,6 +49,23 @@ function CreateProfile() {
       },
     },
   });
+
+  useEffect(() => {
+    const saved = localStorage.getItem("profileFormData");
+    if (saved) {
+      const data = JSON.parse(saved);
+      setName(data.name || "");
+      setEmail(data.email || "");
+      setTitle(data.title || "");
+      setDepartment(data.department || "");
+      setEmployeeId(data.employeeId || "");
+      setLocation(data.location || "");
+      setProfilePicture(data.profilePicture || null);
+      if (editor && data.editorContent) {
+        editor.commands.setContent(data.editorContent);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!editor) return;
@@ -133,6 +156,58 @@ function CreateProfile() {
       if (pm) pm.removeEventListener("click", handler);
     };
   }, [editor]);
+
+  // const handleCreateProfile = () => {
+  //   if (!editor) return;
+  //   const data = {
+  //     name,
+  //     email,
+  //     title,
+  //     department,
+  //     employeeId,
+  //     location,
+  //     profilePicture,
+  //     editorContent: editor.getJSON(),
+  //   };
+  //   localStorage.setItem("profileFormData", JSON.stringify(data));
+  //   alert("Profile created!");
+  // };
+
+  const handleCreateProfile = async () => {
+    if (!editor) return;
+
+    const payload = {
+      name,
+      email,
+      title,
+      department,
+      location,
+      summary: JSON.stringify(editor.getJSON()),
+      created_by: email || "unknown",
+    };
+
+    try {
+      const response = await fetch("http://localhost:8000/api/candidates/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert("Profile successfully saved to backend!");
+        console.log("Saved:", data);
+      } else {
+        const error = await response.json();
+        alert("Failed to save profile:\n" + JSON.stringify(error, null, 2));
+      }
+    } catch (err) {
+      alert("Network error: " + err.message);
+    }
+  };
+
   if (!editor) return null;
 
   return (
@@ -144,50 +219,129 @@ function CreateProfile() {
             <label className="fields-label" htmlFor="Name">
               Name
             </label>
-            <input type="text" className="fields-input" />
+            <input
+              type="text"
+              className="fields-input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
           <div className="profile-fields">
-            <label className="fields-label" htmlFor="Name">
+            <label className="fields-label" htmlFor="Email">
               Email
             </label>
-            <input type="text" className="fields-input" />
+            <input
+              type="text"
+              className="fields-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
         </div>
-
         <div className="fields-wrapper">
           <div className="profile-fields">
-            <label className="fields-label" htmlFor="Name">
+            <label className="fields-label" htmlFor="Title">
               Title
             </label>
-            <input type="text" className="fields-input" />
+            <input
+              type="text"
+              className="fields-input"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
           </div>
           <div className="profile-fields">
-            <label className="fields-label" htmlFor="Name">
+            <label className="fields-label" htmlFor="Department">
               Department
             </label>
-            <input type="text" className="fields-input" />
+            <input
+              type="text"
+              className="fields-input"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+            />
           </div>
         </div>
         <div className="fields-wrapper">
           <div className="profile-fields">
-            <label className="fields-label" htmlFor="Name">
+            <label className="fields-label" htmlFor="EmployeeID">
               Employee ID
             </label>
-            <input type="text" className="fields-input" />
+            <input
+              type="text"
+              className="fields-input"
+              value={employeeId}
+              onChange={(e) => setEmployeeId(e.target.value)}
+            />
           </div>
           <div className="profile-fields">
-            <label className="fields-label" htmlFor="Name">
+            <label className="fields-label" htmlFor="Location">
               Location
             </label>
-            <input type="text" className="fields-input" />
+            <input
+              type="text"
+              className="fields-input"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
           </div>
         </div>
         <div className="profile-fields">
-          <label className="fields-label" htmlFor="Name">
+          <label className="fields-label" htmlFor="ProfilePicture">
             Add Profile Picture
           </label>
-          <div className="pfp-input">
-            <button className="add-pfp">Add Profile Picture</button>
+          <div
+            className="pfp-input pfpinput-2"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: 60,
+            }}
+          >
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              id="profile-picture-input"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    setProfilePicture(reader.result);
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+            {!profilePicture && (
+              <button
+                className="add-pfp"
+                type="button"
+                onClick={() =>
+                  document.getElementById("profile-picture-input").click()
+                }
+                style={{ margin: 0 }}
+              >
+                Add Profile Picture
+              </button>
+            )}
+            {profilePicture && (
+              <img
+                src={profilePicture}
+                alt="Profile Preview"
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: "50%",
+                  margin: 0,
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -332,6 +486,16 @@ function CreateProfile() {
           </div>
           <EditorContent editor={editor} className="editor" />
         </div>
+      </div>
+      <div className="profile-footer">
+        <p>Ensure all fields are correctly filled before submission.</p>
+        <button
+          type="button"
+          className="create-profile-btn"
+          onClick={handleCreateProfile}
+        >
+          Submit
+        </button>
       </div>
     </div>
   );
