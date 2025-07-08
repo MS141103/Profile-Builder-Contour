@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset = 'utf-8'>
+    <title>Candidate Profile</title>
+    <style>
+        body {font-family: Times New Roman, Times, Serif; font-size 12: px;}
+        h1{text-align: center;}
+        .section{margin-bottom: 10px}
+    </style>
+</head>
+<body>
+    <h1>Candidate Profile</h1>
+    <div class = "section"><strong>Name:</Strong>{{candidate.name}}</div>
+    <div class = "section"><strong>Email:</Strong>{{candidate.email}}</div>
+    <div class = "section"><strong>Summary:</Strong>{{ candidate.summary|linebreaker }}</div>
+</body>
+</html>
+
