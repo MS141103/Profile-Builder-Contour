@@ -49,7 +49,14 @@ TEMPLATES = [
 ROOT_URLCONF = 'Profile_builder_DB.urls'
 
 DATABASES = {
-    'default': dj_database_url.config(default = os.environ.get("DATABASE_URL"))# default PostgreSQL port
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'candidate_profiles_db',
+        'USER': 'postgres',
+        'PASSWORD': 'Jagdpanther8.8CMKWK',
+        'HOST': 'localhost',
+        'PORT': '5432',  # default PostgreSQL port
+    }
     }
 
 
