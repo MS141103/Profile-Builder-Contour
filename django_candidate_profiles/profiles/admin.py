@@ -7,8 +7,14 @@ from django.urls import reverse
 
 @admin.register(CandidateProfile)
 class CandidateProfileAdmin(reversion.admin.VersionAdmin):
-    list_display = ['name', 'title', 'email', 'location', 'employee_id']
+    list_display = ['name', 'title', 'email', 'location', 'employee_id', 'pdf_link']
     search_fields = ['name', 'email', 'title']
+    
+    def pdf_link(self, obj):
+        url = reverse('candidate_pdf', args=[obj.pk])
+        return format_html('<a class="button" href="{}" target="_blank">Export PDF</a>', url)
+    pdf_link.short_description = 'PDF Export'
+    
 
 @admin.register(ProfileSummary)
 class ProfileSummaryAdmin(reversion.admin.VersionAdmin):
@@ -17,12 +23,7 @@ class ProfileSummaryAdmin(reversion.admin.VersionAdmin):
 
 class CandidateProfileAdmin(admin.ModelAdmin):
     list_display = ['name', 'email', 'pdf_link']
-
-    def pdf_link(self, obj):
-        url = reverse('candidate_pdf', args=[obj.pk])
-        return format_html('<a class="button" href="{}" target="_blank">Export PDF</a>', url)
-    pdf_link.short_description = 'PDF Export'
-
-admin.site.register(CandidateProfile, CandidateProfileAdmin)    
+    
+#admin.site.register(CandidateProfile, CandidateProfileAdmin)    
 admin.site.register(Employee)
 admin.site.register(PdfExport)
