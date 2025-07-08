@@ -1,5 +1,7 @@
 from pathlib import Path
 import os
+import dj_database_url # needed to run Postgres on Railway
+
 # defines BASE_DIR as root of project (Django will know where db.sqlite 3 should be saved)
 BASE_DIR = Path(__file__).resolve().parent.parent #needed if you are running SQLLITE3
 
@@ -47,15 +49,9 @@ TEMPLATES = [
 ROOT_URLCONF = 'Profile_builder_DB.urls'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'candidate_profiles_db',
-        'USER': 'postgres',
-        'PASSWORD': 'Jagdpanther8.8CMKWK',
-        'HOST': 'localhost',
-        'PORT': '5432',  # default PostgreSQL port
+    'default': dj_database_url.config(default = os.environ.get("DATABASE_URL"))# default PostgreSQL port
     }
-}
+
 
 SECRET_KEY = 'your-secret-key'
 DEBUG = True
