@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent #needed if you are running SQL
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
-    'rest_framework'
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
