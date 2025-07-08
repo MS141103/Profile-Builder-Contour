@@ -3,13 +3,12 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa #download dependecies
 from .models import CandidateProfile
 from rest_framework import viewsets
-from rest_framework import serializers
 from .models import CandidateProfile
-from .serializers import CandidateProfileSerializer
+from rest_framework .serializers import CandidateProfileSerializer
 from reversion.models import Version
 
-class CandidateProfileViewSet(Viewsets.ModelViewSet):
-    queryset = candidateProfile.objects.all()
+class CandidateProfileViewSet(viewsets.ModelViewSet):
+    queryset = CandidateProfile.objects.all()
     serializer_class = CandidateProfileSerializer
 
 def render_to_pdf(template_src, context_dict={}):
