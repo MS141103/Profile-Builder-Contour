@@ -5,7 +5,7 @@ from .views import CandidateProfileViewSet
 from django.conf.urls import include
 
 router = DefaultRouter()
-router.register
+router.register(r"profiles", CandidateProfileViewSet)
 
 
 urlpatterns = [
