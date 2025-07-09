@@ -5,7 +5,7 @@ import dj_database_url # needed to run Postgres on Railway
 # defines BASE_DIR as root of project (Django will know where db.sqlite 3 should be saved)
 BASE_DIR = Path(__file__).resolve().parent.parent #needed if you are running SQLLITE3
 
-ALLOWED_HOSTS = ["*"]
+# ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     'rest_framework',
