@@ -1,13 +1,3 @@
-.tiptap-attachment-link {
-  color: #fff !important;
-  text-decoration: none !important;
-  font-weight: 500;
-  margin: 6px 4px 6px 0;
-  background-color: #2a4874;
-  padding: 10px;
-  border-radius: 50px;
-  pointer-events: none !important;
-}
 .tiptap-attachment-image {
   max-width: 160px;
   max-height: 120px;
@@ -15,33 +5,6 @@
   margin: 8px 0;
   display: block;
   box-shadow: 0 2px 8px rgba(36, 182, 174, 0.12);
-}
-.tiptap-attachment-btn {
-  display: inline-block;
-  background: #2a4874;
-  color: #fff;
-  border: none;
-  border-radius: 18px;
-  padding: 6px 16px;
-  font-size: 15px;
-  font-family: inherit;
-  font-weight: 500;
-  margin: 6px 4px 6px 0;
-  cursor: pointer;
-  outline: none;
-  transition: background 0.2s;
-  box-shadow: 0 2px 8px rgba(36, 182, 174, 0.1);
-  pointer-events: auto;
-}
-.tiptap-attachment-btn:hover,
-.tiptap-attachment-btn:focus {
-  background: #d6e7ff;
-}
-.tiptap-attachment-btn:active {
-  background: #d6e7ff;
-}
-.tiptap-attachment-btn[contenteditable="false"] {
-  user-select: none;
 }
 .editor .ProseMirror::-webkit-scrollbar-button {
   display: none;

@@ -23,7 +23,7 @@ function ProfileSearch() {
             <div className="profile-card-header">
               <img src={pfp} alt="" className="card-pfp" />
               <div className="card-details">
-                <h2 className="card-title">Abdul Salam</h2>
+                <h2 className="card-title">Full Name</h2>
                 <h2 className="card-desc">Jr. Software Engineer</h2>
               </div>
             </div>
@@ -35,7 +35,7 @@ function ProfileSearch() {
             <div className="profile-card-header">
               <img src={pfp} alt="" className="card-pfp" />
               <div className="card-details">
-                <h2 className="card-title">Abdul Salam</h2>
+                <h2 className="card-title">Full Name</h2>
                 <h2 className="card-desc">Jr. Software Engineer</h2>
               </div>
             </div>
@@ -47,7 +47,7 @@ function ProfileSearch() {
             <div className="profile-card-header">
               <img src={pfp} alt="" className="card-pfp" />
               <div className="card-details">
-                <h2 className="card-title">Abdul Salam</h2>
+                <h2 className="card-title">Full Name</h2>
                 <h2 className="card-desc">Jr. Software Engineer</h2>
               </div>
             </div>
@@ -61,7 +61,7 @@ function ProfileSearch() {
             <div className="profile-card-header">
               <img src={pfp} alt="" className="card-pfp" />
               <div className="card-details">
-                <h2 className="card-title">Abdul Salam</h2>
+                <h2 className="card-title">Full Name</h2>
                 <h2 className="card-desc">Jr. Software Engineer</h2>
               </div>
             </div>
@@ -73,7 +73,7 @@ function ProfileSearch() {
             <div className="profile-card-header">
               <img src={pfp} alt="" className="card-pfp" />
               <div className="card-details">
-                <h2 className="card-title">Abdul Salam</h2>
+                <h2 className="card-title">Full Name</h2>
                 <h2 className="card-desc">Jr. Software Engineer</h2>
               </div>
             </div>
@@ -85,7 +85,7 @@ function ProfileSearch() {
             <div className="profile-card-header">
               <img src={pfp} alt="" className="card-pfp" />
               <div className="card-details">
-                <h2 className="card-title">Abdul Salam</h2>
+                <h2 className="card-title">Full Name</h2>
                 <h2 className="card-desc">Jr. Software Engineer</h2>
               </div>
             </div>

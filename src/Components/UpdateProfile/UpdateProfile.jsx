@@ -8,7 +8,7 @@ import TextAlign from "@tiptap/extension-text-align";
 import FontSize from "tiptap-extension-font-size";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
-import "./CreateProfile.css";
+import "./UpdateProfile.css";
 import { FaFont, FaPaperclip } from "react-icons/fa";
 import { MdOutlineFormatBold } from "react-icons/md";
 import { FaItalic } from "react-icons/fa";
@@ -17,7 +17,7 @@ import { PiTextAlignLeftBold } from "react-icons/pi";
 import { PiTextAlignCenterBold } from "react-icons/pi";
 import { PiTextAlignRightBold } from "react-icons/pi";
 
-function CreateProfile() {
+function UpdateProfile() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [title, setTitle] = useState("");
@@ -27,6 +27,8 @@ function CreateProfile() {
   const [profilePicture, setProfilePicture] = useState(null);
   const [fontSize, setFontSize] = useState("16px");
   const fileInputRef = useRef(null);
+
+  // Editor instance
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -42,13 +44,31 @@ function CreateProfile() {
       }),
       Link.configure({ openOnClick: false }),
     ],
-    content: "",
+    content: "", // Will be set after loading from localStorage
     editorProps: {
       attributes: {
         class: "ProseMirror tiptap-editor-custom",
       },
     },
   });
+
+  useEffect(() => {
+    if (!editor) return;
+    const saved = localStorage.getItem("profileFormData");
+    if (saved) {
+      const data = JSON.parse(saved);
+      setName(data.name || "");
+      setEmail(data.email || "");
+      setTitle(data.title || "");
+      setDepartment(data.department || "");
+      setEmployeeId(data.employeeId || "");
+      setLocation(data.location || "");
+      setProfilePicture(data.profilePicture || null);
+      if (data.editorContent) {
+        editor.commands.setContent(data.editorContent);
+      }
+    }
+  }, [editor]);
 
   useEffect(() => {
     if (!editor) return;
@@ -140,26 +160,7 @@ function CreateProfile() {
     };
   }, [editor]);
 
-  // Load from localStorage on mount, after editor is ready
-  useEffect(() => {
-    if (!editor) return;
-    const saved = localStorage.getItem("profileFormData");
-    if (saved) {
-      const data = JSON.parse(saved);
-      setName(data.name || "");
-      setEmail(data.email || "");
-      setTitle(data.title || "");
-      setDepartment(data.department || "");
-      setEmployeeId(data.employeeId || "");
-      setLocation(data.location || "");
-      setProfilePicture(data.profilePicture || null);
-      if (data.editorContent) {
-        editor.commands.setContent(data.editorContent);
-      }
-    }
-  }, [editor]);
-
-  const handleCreateProfile = () => {
+  const handleUpdateProfile = async () => {
     if (!editor) return;
     const data = {
       name,
@@ -172,27 +173,14 @@ function CreateProfile() {
       editorContent: editor.getJSON(),
     };
     localStorage.setItem("profileFormData", JSON.stringify(data));
-    alert("Profile created and saved to localStorage!");
+    alert("Profile updated in localStorage!");
   };
-
-  if (!editor) return;
-  const data = {
-    name,
-    email,
-    title,
-    department,
-    employeeId,
-    location,
-    profilePicture,
-    editorContent: editor.getJSON(),
-  };
-  localStorage.setItem("profileFormData", JSON.stringify(data));
 
   if (!editor) return null;
 
   return (
     <div>
-      <h2 className="profile-creation-title">Create Profile</h2>
+      <h2 className="profile-creation-title">Update Profile</h2>
       <div className="fields-container">
         <div className="fields-wrapper">
           <div className="profile-fields">
@@ -468,17 +456,17 @@ function CreateProfile() {
         </div>
       </div>
       <div className="profile-footer">
-        <p>Ensure all fields are correctly filled before submission.</p>
+        <p>Update your profile and click the button below to save changes.</p>
         <button
           type="button"
           className="create-profile-btn"
-          onClick={handleCreateProfile}
+          onClick={handleUpdateProfile}
         >
-          Submit
+          Update
         </button>
       </div>
     </div>
   );
 }
 
-export default CreateProfile;
+export default UpdateProfile;

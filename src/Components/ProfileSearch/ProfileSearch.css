@@ -121,4 +121,10 @@
   width: 100%;
   font-weight: 500;
   font-family: "Ubuntu";
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.view-details-btn:hover {
+  transform: scale(1.07) translateY(-3px);
 }
