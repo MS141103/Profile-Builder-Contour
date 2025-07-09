@@ -1,7 +1,7 @@
 
 from django.db import models
 from django.contrib.auth.models import User
-
+# ignore this, will remove and add a department attribute in CandidateProfiles
 class Department(models.Model):
     name = models.CharField(max_length=100)
     team = models.CharField(max_length=100)
