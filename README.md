@@ -127,4 +127,27 @@ Testing Integration:
   
   Frontend can use Django templates or build a separate SPA; just consume the provided API and PDF endpoints.
 
+FOR BACKEND:
 
+    - Work on PDF Export functionality
+
+        Status: Modeel and button in Admin are defined
+        Issue: Error in style section of html. Use Weasy print instead of xhtml2
+
+    - Replace views.py with your version in the backend and integrate it
+
+    - Implement API endpoints for CRUD
+        Fetch Candidate info
+        serve pdfs
+        add test cases via pytest or Django's test case
+
+
+    -Implement API layer and serializers
+        Status: REST FRAMEWORK Installed. Missing serializers
+        implement Django Rest Framework serializers.py for CandidateProfile, Employee, ProfileSummary and PDFexport
+
+
+    -Ensure django-reversion installed and applied in admin.py for all models
+
+
+        
