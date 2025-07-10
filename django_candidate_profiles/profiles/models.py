@@ -3,19 +3,19 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Department(models.Model):
-    name = models.CharField(max_length=100)
-    team = models.CharField(max_length=100)
-    manager = models.CharField(max_length=100)
+    name = models.CharField(max_length=20)
+    team = models.CharField(max_length=30)
+    manager = models.CharField(max_length=20)
     tenure = models.PositiveIntegerField(help_text="Tenure in months")
 
     def __str__(self):
         return f"{self.name} - {self.team}"
 
 class CandidateProfile(models.Model):
-    name = models.CharField(max_length=100)
-    title = models.CharField(max_length=100)
-    location = models.CharField(max_length=100)
-    employee_id = models.CharField(max_length=50, blank=True, null=True)
+    name = models.CharField(max_length=20)
+    title = models.CharField(max_length=20)
+    location = models.CharField(max_length=6)
+    employee_id = models.CharField(max_length=10, blank=True, null=True)
     email = models.EmailField(unique=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -44,8 +44,8 @@ class ProfileSummary(models.Model):
     
 class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    employee_id  = models.CharField(max_length = 20)
-    Department = models.CharField(max_length = 100)
+    employee_id  = models.CharField(max_length = 10)
+    Department = models.CharField(max_length = 5)
     
     def __str__(self):
         return f"{self.user.username}({self.employee_id})"

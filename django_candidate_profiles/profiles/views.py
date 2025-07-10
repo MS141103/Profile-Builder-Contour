@@ -34,3 +34,7 @@ def export_pdf(request, candidate_id):
     pisa_status = pisa.CreatePDF(html, dest = response)
     
     return response
+
+def display_images(request):
+    images = CandidateProfile.objects.get(name = "profile_image")
+    return render(request, 'myapp/image_list.html', {'images':images})

@@ -1,19 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang = "en">
 <head>
-    <meta charset = 'utf-8'>
+    <meta charset = 'UTF-8'>
     <title>Candidate Profile</title>
     <style>
-        body {font-family: Times New Roman, Times, Serif; font-size 12: px;}
-        h1{text-align: center;}
-        .section{margin-bottom: 10px}
+        body {
+            font-family: Times New Roman, Times; 
+            margin: 40px;
+        }
+        h1 {
+            font-size: 24px
+            colour: #333;
+        margin-bottom: 20px;
+        }
+        p {
+            font-size: 14px;
+            margin: 6px 0;
+        }
+        .section {
+            margin-bottom: 25px;
+        }
     </style>
 </head>
 <body>
     <h1>Candidate Profile</h1>
     <div class = "section"><strong>Name:</Strong>{{candidate.name}}</div>
     <div class = "section"><strong>Email:</Strong>{{candidate.email}}</div>
-    <div class = "section"><strong>Summary:</Strong>{{ candidate.summary|linebreaker }}</div>
+    <div class = "section"><strong>Summary:</Strong>{{ candidate.summary }}</div>
 </body>
 </html>
 
