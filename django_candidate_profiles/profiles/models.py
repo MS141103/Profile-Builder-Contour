@@ -1,15 +1,6 @@
 
 from django.db import models
 from django.contrib.auth.models import User
-# ignore this, will remove and add a department attribute in CandidateProfiles
-class Department(models.Model):
-    name = models.CharField(max_length=20)
-    team = models.CharField(max_length=30)
-    manager = models.CharField(max_length=20)
-    tenure = models.PositiveIntegerField(help_text="Tenure in months")
-
-    def __str__(self):
-        return f"{self.name} - {self.team}"
 
 class CandidateProfile(models.Model):
     name = models.CharField(max_length=20)
@@ -17,12 +8,9 @@ class CandidateProfile(models.Model):
     location = models.CharField(max_length=6)
     employee_id = models.CharField(max_length=10, blank=True, null=True)
     email = models.EmailField(unique=True)
-
+    profile_image = models.ImageField(upload_to = 'my_images/') # configure url
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-     # Optional ForeignKey to Department
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
 
     # Flag for use
     is_active = models.BooleanField(default=True, help_text="Should this profile be considered for suggestions?")
