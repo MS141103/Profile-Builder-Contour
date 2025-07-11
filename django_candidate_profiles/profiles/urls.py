@@ -11,7 +11,7 @@ urlpatterns = [
     path('candidates/', CandidateProfileView.as_view()),
     path('candidates/<int:pk>/', CandidateProfileView.as_view()),
     path('candidates/<int:summary_id>/export/', ExportResumeView.as_view()),
-    
+    path('export_pdf/<int:summary_id>/', ExportResumeView.as_view(), name='candidate_pdf'),
     path('api/', include(router.urls)) #check if we should remove this or not
 
 ]
