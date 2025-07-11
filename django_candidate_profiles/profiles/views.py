@@ -1,39 +1,68 @@
-from django.http import HttpResponse
-from django.template.loader import get_template
-from xhtml2pdf import pisa #download dependecies
-from .models import CandidateProfile
-from rest_framework import viewsets
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404
+from .models import CandidateProfile, PDFExport
 from .serializers import CandidateProfileSerializer
-from .models import CandidateProfile
-from reversion.models import Version
-
-class CandidateProfileViewSet(viewsets.ModelViewSet):
-    queryset = CandidateProfile.objects.all()
-    serializer_class = CandidateProfileSerializer
-
-def render_to_pdf(template_src, context_dict={}):
-    template = get_template(template_src)
-    html = template.render(context_dict)
-    response = HttpResponse(content_type='application/pdf')
-    pisa_status = pisa.CreatePDF(html, dest=response)
-    if pisa_status.err:
-        return HttpResponse('Error generating PDF', status=500)
-    return response
-
-def candidate_pdf_view(request, pk):
-    candidate = CandidateProfile.objects.get(pk=pk)
-    context = {'candidate': candidate}
-    return render_to_pdf('profiles/candidate_pdf_template.html', context)
-
-def export_pdf(request, candidate_id):
-    candidate = CandidateProfile.objects.get(id = candidate_id)
-    template = get_template("pdf/profile_template.html")
-    html = template.render({"candidate": candidate})
+import os
+from django.conf import settings
+from django.utils import timezone
+from django.shortcuts import render
     
-    response = HttpResponse(content_type="application/pdf")
-    pisa_status = pisa.CreatePDF(html, dest = response)
-    
-    return response
+class CandidateProfileView(APIView):
+
+    def get(self, request, pk=None):
+        if pk:
+            candidate = get_object_or_404(CandidateProfile, pk=pk)
+            serializer = CandidateProfileSerializer(candidate)
+            return Response(serializer.data)
+        else:
+            candidates = CandidateProfile.objects.all()
+            serializer = CandidateProfileSerializer(candidates, many=True)
+            return Response(serializer.data)
+def post(self, request):
+        serializer = CandidateProfileSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+def delete(self, request, pk):
+        candidate = get_object_or_404(CandidateProfile, pk=pk)
+        candidate.delete()
+        return Response({'message': 'Candidate deleted successfully'}, status=204)
+
+def put(self, request, pk):
+        candidate = get_object_or_404(CandidateProfile, pk=pk)
+        serializer = CandidateProfileSerializer(candidate, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+class ExportResumeView(APIView):
+    def post(self, request, summary_id):
+        candidate = get_object_or_404(CandidateProfile, id=summary_id)
+
+        # Generate dummy PDF path
+        pdf_filename = f"resume_{candidate.id}.pdf"
+        pdf_path = os.path.join(settings.MEDIA_ROOT, pdf_filename)
+
+        # Create dummy PDF file (replace with real rendering in production)
+        with open(pdf_path, 'wb') as f:
+            f.write(b'%PDF-1.4\n% Dummy PDF content for candidate')
+
+        # Save export record
+        if request.user.is_authenticated and hasattr(request.user, 'employee'):
+            PDFExport.objects.create(
+                candidate=candidate,
+                generated_by=request.user.employee,
+                file_path=pdf_path,
+                generated_at=timezone.now()
+            )
+
+        return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
 
 def display_images(request):
     images = CandidateProfile.objects.get(name = "profile_image")
