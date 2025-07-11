@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
-from .models import CandidateProfile, PDFExport
+from .models import CandidateProfile, PdfExport
 from .serializers import CandidateProfileSerializer
 import os
 from django.conf import settings
@@ -55,7 +55,7 @@ class ExportResumeView(APIView):
 
         # Save export record
         if request.user.is_authenticated and hasattr(request.user, 'employee'):
-            PDFExport.objects.create(
+            PdfExport.objects.create(
                 candidate=candidate,
                 generated_by=request.user.employee,
                 file_path=pdf_path,

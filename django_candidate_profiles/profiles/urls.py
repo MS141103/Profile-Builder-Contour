@@ -1,11 +1,10 @@
 from django.urls import path
-from .views import candidate_pdf_view
 from rest_framework.routers import DefaultRouter
 from .views import CandidateProfileView, ExportResumeView
 from django.conf.urls import include
 
 router = DefaultRouter()
-router.register(r"profiles", CandidateProfileView) #check if still needed
+#router.register(r"profiles", CandidateProfileView) #check if still needed
 
 
 urlpatterns = [

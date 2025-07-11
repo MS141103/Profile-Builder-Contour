@@ -8,7 +8,9 @@ class CandidateProfile(models.Model):
     location = models.CharField(max_length=6)
     employee_id = models.CharField(max_length=10, blank=True, null=True)
     email = models.EmailField(unique=True)
-    profile_image = models.ImageField(upload_to = 'my_images/') # configure url
+    profile_image = models.ImageField(upload_to = 'my_images/',
+    null=True,
+    blank=True) # configure url
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
