@@ -8,6 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent #needed if you are running SQL
 
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django_seed',
     'rest_framework',
     'django.contrib.admin',
@@ -21,6 +22,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
