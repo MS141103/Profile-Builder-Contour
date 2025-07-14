@@ -67,6 +67,7 @@ DATABASES = {
 SECRET_KEY = 'your-secret-key'
 DEBUG = True
 ALLOWED_HOSTS = []
+CORS_ALLOW_ALL_ORIGINS = True
 # used to serve CSS, for now keep STATIC_URL = '/static/'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
