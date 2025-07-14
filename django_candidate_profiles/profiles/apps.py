@@ -1,11 +1,16 @@
-
 from django.apps import AppConfig
 import reversion
 
 class ProfilesConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'profiles'
-
+    def ready(self):
+        from django.apps import apps
+        try:
+            ProfileSummary = apps.get_model('resume_versions', 'ProfileSummary')
+            reversion.register(ProfileSummary)
+        except LookupError:
+            pass
 
         
     '''def ready(self):
@@ -15,4 +20,6 @@ class ProfilesConfig(AppConfig):
         # Already defined in admin, causes a conflict. 
         # But this allows us to version outside of admin
         # Need to find a resolution
-        
+
+
+   

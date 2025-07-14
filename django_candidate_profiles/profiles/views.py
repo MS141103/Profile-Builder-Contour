@@ -1,14 +1,15 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status,viewsets
 from django.http import FileResponse
-from django.shortcuts import get_object_or_404
-from .models import CandidateProfile, PdfExport
-from .serializers import CandidateProfileSerializer
+from django.shortcuts import get_object_or_404,render
+from .models import CandidateProfile, PdfExport,ProfileSummary,Employee
+from .serializers import CandidateProfileSerializer,ProfileSummarySerializer,EmployeeSerializer
 import os
 from django.conf import settings
 from django.utils import timezone
-from django.shortcuts import render
+import reversion  
+from reversion.models import Version
     
 class CandidateProfileView(APIView):
 
@@ -67,3 +68,36 @@ class ExportResumeView(APIView):
 def display_images(request):
     images = CandidateProfile.objects.get(name = "profile_image")
     return render(request, 'myapp/image_list.html', {'images':images})
+
+class ProfileSummaryViewSet(viewsets.ModelViewSet):
+    queryset = ProfileSummary.objects.all()
+    serializer_class = ProfileSummarySerializer
+
+    def perform_create(self, serializer):
+        with reversion.create_revision():
+            instance = serializer.save()
+            reversion.set_comment("Created via API")
+
+    def perform_update(self, serializer):
+        with reversion.create_revision():
+            instance = serializer.save()
+            reversion.set_comment("Updated via API")
+
+                     
+class ProfileSummaryVersionsView(APIView):
+    def get(self,request,pk):
+        summary=ProfileSummary.objects.get(pk=pk)
+        versions=Version.objects.get_for_object(summary)
+        data=[
+            {
+                "revision":v.revision.id,
+                "date_created":v.revision.date_created,
+                "summary_text": v.field_dict.get("summary_text"),
+            }
+            for v in versions
+        ]
+        return Response(data)
+        
+class EmployeeViewSet(viewsets.ModelViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer        
