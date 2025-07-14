@@ -1,9 +1,9 @@
 from rest_framework import serializers
 from .models import CandidateProfile,ProfileSummary,Employee
 from .models import ProfileSummary
-from profiles.serializers import CandidateSerializer
+#from profiles.serializers import CandidateSerializer
 from django.contrib.auth.models import User
-from django_candidate_profiles.profiles.utils.user_utils import create_user_account
+from profiles.utils.user_utils import create_user_account
 
 class CandidateProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,7 +11,7 @@ class CandidateProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProfileSummarySerializer(serializers.ModelSerializer):
-    candidate=CandidateSerializer()
+    candidate=CandidateProfileSerializer()
     class Meta:
         model=ProfileSummary
         fields=['id','candidate','summary_text','created_at','updated_at']

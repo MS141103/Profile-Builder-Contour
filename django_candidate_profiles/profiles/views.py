@@ -64,6 +64,11 @@ class ExportResumeView(APIView):
             )
 
         return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
+    
+    def get(self, request, summary_id):
+        if not request.user.is_staff:
+            return Response({"error": "Unauthorized"}, status=403)
+        return self.post(request, summary_id)
 
 def display_images(request):
     images = CandidateProfile.objects.get(name = "profile_image")
