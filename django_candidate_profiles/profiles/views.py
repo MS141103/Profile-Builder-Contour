@@ -106,8 +106,14 @@ def display_images(request):
     return render(request, 'myapp/image_list.html', {'images':images})
 
 class ProfileSummaryViewSet(viewsets.ModelViewSet):
-    queryset = ProfileSummary.objects.all()
     serializer_class = ProfileSummarySerializer
+
+    def get_queryset(self):
+        queryset = ProfileSummary.objects.all()
+        candidate_id = self.request.query_params.get('candidate_id')
+        if candidate_id:
+            queryset = queryset.filter(candidate__id=candidate_id)
+        return queryset
 
     def perform_create(self, serializer):
         with reversion.create_revision():
