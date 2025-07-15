@@ -10,6 +10,8 @@ from django.conf import settings
 from django.utils import timezone
 import reversion  
 from reversion.models import Version
+from reportlab.pdfgen import canvas
+from io import BytesIO
     
 class CandidateProfileView(APIView):
 
@@ -43,9 +45,38 @@ def put(self, request, pk):
         return Response(serializer.errors, status=400)
 
 class ExportResumeView(APIView):
-    def post(self, request, summary_id):
-        candidate = get_object_or_404(CandidateProfile, id=summary_id)
+    def get(self, request, summary_id):
+        try:
+            candidate = get_object_or_404(CandidateProfile, id=summary_id)
+            
+            # Create a byte buffer for the PDF
+            buffer = BytesIO()
 
+            # Create the PDF object, using the buffer as its "file"
+            p = canvas.Canvas(buffer)
+
+            # Write content to the PDF
+            p.setFont("Helvetica", 14)
+            p.drawString(100, 800, f"Candidate Resume: {candidate.name}")
+            p.setFont("Helvetica", 12)
+            p.drawString(100, 770, f"Title: {candidate.title}")
+            p.drawString(100, 750, f"Location: {candidate.location}")
+            p.drawString(100, 730, f"Email: {candidate.email}")
+            p.drawString(100, 710, f"Employee ID: {candidate.employee_id or 'N/A'}")
+
+                # Finish up
+            p.showPage()
+            p.save()
+
+                # Move buffer to the beginning
+            buffer.seek(0)
+
+            # Return as a FileResponse
+            return FileResponse(buffer, as_attachment=True, filename=f"{candidate.name}_resume.pdf")
+
+        except CandidateProfile.DoesNotExist:
+            return Response({"error": "Candidate not found"}, status=status.HTTP_404_NOT_FOUND)
+'''
         # Generate dummy PDF path
         pdf_filename = f"resume_{candidate.id}.pdf"
         pdf_path = os.path.join(settings.MEDIA_ROOT, pdf_filename)
@@ -64,8 +95,8 @@ class ExportResumeView(APIView):
             )
 
         return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
-    
-    def get(self, request, summary_id):
+'''    
+def get(self, request, summary_id):
         if not request.user.is_staff:
             return Response({"error": "Unauthorized"}, status=403)
         return self.post(request, summary_id)
