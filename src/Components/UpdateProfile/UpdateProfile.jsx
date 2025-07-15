@@ -16,6 +16,8 @@ import { FaUnderline } from "react-icons/fa";
 import { PiTextAlignLeftBold } from "react-icons/pi";
 import { PiTextAlignCenterBold } from "react-icons/pi";
 import { PiTextAlignRightBold } from "react-icons/pi";
+import axios from "axios";
+import { useParams } from "react-router-dom";
 
 function UpdateProfile() {
   const [name, setName] = useState("");
@@ -25,10 +27,13 @@ function UpdateProfile() {
   const [employeeId, setEmployeeId] = useState("");
   const [location, setLocation] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
+  const [profilePicturePreview, setProfilePicturePreview] = useState(null); // base64 string or backend URL
   const [fontSize, setFontSize] = useState("16px");
   const fileInputRef = useRef(null);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
+  const { id } = useParams();
 
-  // Editor instance
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -44,7 +49,7 @@ function UpdateProfile() {
       }),
       Link.configure({ openOnClick: false }),
     ],
-    content: "", // Will be set after loading from localStorage
+    content: "",
     editorProps: {
       attributes: {
         class: "ProseMirror tiptap-editor-custom",
@@ -53,22 +58,31 @@ function UpdateProfile() {
   });
 
   useEffect(() => {
-    if (!editor) return;
-    const saved = localStorage.getItem("profileFormData");
-    if (saved) {
-      const data = JSON.parse(saved);
-      setName(data.name || "");
-      setEmail(data.email || "");
-      setTitle(data.title || "");
-      setDepartment(data.department || "");
-      setEmployeeId(data.employeeId || "");
-      setLocation(data.location || "");
-      setProfilePicture(data.profilePicture || null);
-      if (data.editorContent) {
-        editor.commands.setContent(data.editorContent);
+    async function fetchProfileById() {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/profiles/summaries/${id}/`
+        );
+        const profile = response.data;
+        setName(profile.candidate.name || "");
+        setEmail(profile.candidate.email || "");
+        setTitle(profile.candidate.title || "");
+        setDepartment(profile.candidate.department || "");
+        setEmployeeId(profile.candidate.employee_id || "");
+        setLocation(profile.candidate.location || "");
+        setProfilePicture(null); // always null on fetch
+        setProfilePicturePreview(profile.candidate.profile_image || null); // backend URL
+        if (editor && profile.summary_text) {
+          editor.commands.setContent(profile.summary_text, "html");
+        }
+      } catch (err) {
+        setFetchError("Failed to fetch profile data.");
+      } finally {
+        setLoading(false);
       }
     }
-  }, [editor]);
+    if (editor && id) fetchProfileById();
+  }, [editor, id]);
 
   useEffect(() => {
     if (!editor) return;
@@ -161,19 +175,32 @@ function UpdateProfile() {
   }, [editor]);
 
   const handleUpdateProfile = async () => {
-    if (!editor) return;
-    const data = {
-      name,
-      email,
-      title,
-      department,
-      employeeId,
-      location,
-      profilePicture,
-      editorContent: editor.getJSON(),
-    };
-    localStorage.setItem("profileFormData", JSON.stringify(data));
-    alert("Profile updated in localStorage!");
+    if (!id) {
+      alert("No valid profile to update.");
+      return;
+    }
+    try {
+      const formData = new FormData();
+      formData.append("candidate.name", name);
+      formData.append("candidate.email", email);
+      formData.append("candidate.title", title);
+      formData.append("candidate.department", department); // always append department
+      formData.append("candidate.employee_id", employeeId);
+      formData.append("candidate.location", location);
+      formData.append("summary_text", editor.getHTML());
+      if (profilePicture instanceof File) {
+        formData.append("candidate.profile_image", profilePicture);
+      }
+      await axios.patch(
+        `http://localhost:8000/profiles/summaries/${id}/`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      alert("Profile updated successfully!");
+    } catch (err) {
+      console.log("Update error:", err.response?.data || err.message);
+      alert("Failed to update profile. Check console for details.");
+    }
   };
 
   if (!editor) return null;
@@ -219,30 +246,6 @@ function UpdateProfile() {
             />
           </div>
           <div className="profile-fields">
-            <label className="fields-label" htmlFor="Department">
-              Department
-            </label>
-            <input
-              type="text"
-              className="fields-input"
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="fields-wrapper">
-          <div className="profile-fields">
-            <label className="fields-label" htmlFor="EmployeeID">
-              Employee ID
-            </label>
-            <input
-              type="text"
-              className="fields-input"
-              value={employeeId}
-              onChange={(e) => setEmployeeId(e.target.value)}
-            />
-          </div>
-          <div className="profile-fields">
             <label className="fields-label" htmlFor="Location">
               Location
             </label>
@@ -254,9 +257,42 @@ function UpdateProfile() {
             />
           </div>
         </div>
+        <div className="fields-wrapper2">
+          <div className="profile-fields">
+            <label className="fields-label" htmlFor="EmployeeID">
+              Employee ID
+            </label>
+            <input
+              type="text"
+              className="fields-input"
+              value={employeeId}
+              onChange={(e) => setEmployeeId(e.target.value)}
+            />
+          </div>
+        </div>
         <div className="profile-fields">
-          <label className="fields-label" htmlFor="ProfilePicture">
+          <label
+            className="fields-label"
+            htmlFor="ProfilePicture"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
             Add Profile Picture
+            {profilePicturePreview && (
+              <button
+                className="add-pfp2"
+                type="button"
+                onClick={() =>
+                  document.getElementById("profile-picture-input").click()
+                }
+                style={{ marginLeft: "auto", marginRight: 0 }}
+              >
+                Update
+              </button>
+            )}
           </label>
           <div
             className="pfp-input pfpinput-2"
@@ -276,15 +312,16 @@ function UpdateProfile() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
+                  setProfilePicture(file); // store the File object
                   const reader = new FileReader();
                   reader.onload = () => {
-                    setProfilePicture(reader.result);
+                    setProfilePicturePreview(reader.result); // store the preview
                   };
                   reader.readAsDataURL(file);
                 }
               }}
             />
-            {!profilePicture && (
+            {!profilePicturePreview && (
               <button
                 className="add-pfp"
                 type="button"
@@ -296,9 +333,9 @@ function UpdateProfile() {
                 Add Profile Picture
               </button>
             )}
-            {profilePicture && (
+            {profilePicturePreview && (
               <img
-                src={profilePicture}
+                src={profilePicturePreview}
                 alt="Profile Preview"
                 style={{
                   width: 80,

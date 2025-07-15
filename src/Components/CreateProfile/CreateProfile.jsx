@@ -16,6 +16,7 @@ import { FaUnderline } from "react-icons/fa";
 import { PiTextAlignLeftBold } from "react-icons/pi";
 import { PiTextAlignCenterBold } from "react-icons/pi";
 import { PiTextAlignRightBold } from "react-icons/pi";
+import axios from "axios";
 
 function CreateProfile() {
   const [name, setName] = useState("");
@@ -25,8 +26,12 @@ function CreateProfile() {
   const [employeeId, setEmployeeId] = useState("");
   const [location, setLocation] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
+  const [profilePicturePreview, setProfilePicturePreview] = useState(null); // base64 string or backend URL
   const [fontSize, setFontSize] = useState("16px");
+  const [profilePictureFile, setProfilePictureFile] = useState(null);
   const fileInputRef = useRef(null);
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -140,58 +145,173 @@ function CreateProfile() {
     };
   }, [editor]);
 
-  // Load from localStorage on mount, after editor is ready
-  useEffect(() => {
-    if (!editor) return;
-    const saved = localStorage.getItem("profileFormData");
-    if (saved) {
-      const data = JSON.parse(saved);
-      setName(data.name || "");
-      setEmail(data.email || "");
-      setTitle(data.title || "");
-      setDepartment(data.department || "");
-      setEmployeeId(data.employeeId || "");
-      setLocation(data.location || "");
-      setProfilePicture(data.profilePicture || null);
-      if (data.editorContent) {
-        editor.commands.setContent(data.editorContent);
+  function flattenErrors(data, fieldMap = {}, parentKey = "") {
+    let messages = [];
+    for (const [key, value] of Object.entries(data)) {
+      const displayKey = fieldMap[key] || key.replace("candidate.", "");
+      if (Array.isArray(value)) {
+        messages.push(`${displayKey}: ${value.join(", ")}`);
+      } else if (typeof value === "object" && value !== null) {
+        // Recursively flatten nested errors
+        messages = messages.concat(flattenErrors(value, fieldMap, key));
+      } else {
+        messages.push(`${displayKey}: ${value}`);
       }
     }
-  }, [editor]);
+    return messages;
+  }
 
-  const handleCreateProfile = () => {
+  function getFriendlyErrorMessage(error) {
+    if (!error.response) {
+      return "Could not connect to the server. Please check your internet connection or try again later.";
+    }
+    if (error.response.status === 400) {
+      const data = error.response.data;
+      if (typeof data === "object") {
+        const requiredFields = [
+          "candidate.name",
+          "candidate.title",
+          "candidate.location",
+          "candidate.employee_id",
+          "candidate.email",
+          "summary_text",
+        ];
+        const missing = requiredFields.filter((field) => data[field]);
+        if (missing.length > 0) {
+          return "Please fill all the required fields.";
+        }
+        if (data["candidate.email"]) {
+          const emailError = Array.isArray(data["candidate.email"])
+            ? data["candidate.email"].join(" ").toLowerCase()
+            : String(data["candidate.email"]).toLowerCase();
+          if (
+            emailError.includes("valid email") ||
+            emailError.includes("valid e-mail") ||
+            emailError.includes("valid e mail") ||
+            emailError.includes("enter a valid")
+          ) {
+            return "Please enter a valid email address.";
+          }
+        }
+        const fieldMap = {
+          "candidate.name": "Name",
+          "candidate.title": "Title",
+          "candidate.location": "Location",
+          "candidate.employee_id": "Employee ID",
+          "candidate.email": "Email",
+          "candidate.profile_image": "Profile Picture",
+          summary_text: "Profile Summary",
+        };
+        return flattenErrors(data, fieldMap).join("\n");
+      }
+      return "There was a problem with your submission. Please check your input.";
+    }
+    if (error.response.status === 404) {
+      return "The requested resource was not found. Please contact support.";
+    }
+    if (error.response.status === 500) {
+      return "A server error occurred. Please try again later.";
+    }
+    return "An unknown error occurred. Please try again.";
+  }
+
+  const handleCreateProfile = async () => {
     if (!editor) return;
-    const data = {
-      name,
-      email,
-      title,
-      department,
-      employeeId,
-      location,
-      profilePicture,
-      editorContent: editor.getJSON(),
-    };
-    localStorage.setItem("profileFormData", JSON.stringify(data));
-    alert("Profile created and saved to localStorage!");
-  };
+    if (
+      !name ||
+      !email ||
+      !title ||
+      !location ||
+      !employeeId ||
+      !editor.getText().trim()
+    ) {
+      setErrorMessage("Please fill all the required fields.");
+      setErrorModalOpen(true);
+      return;
+    }
 
-  if (!editor) return;
-  const data = {
-    name,
-    email,
-    title,
-    department,
-    employeeId,
-    location,
-    profilePicture,
-    editorContent: editor.getJSON(),
+    try {
+      const formData = new FormData();
+      formData.append("candidate.name", name);
+      formData.append("candidate.email", email);
+      formData.append("candidate.title", title);
+      formData.append("candidate.department", department); // always append department
+      formData.append("candidate.employee_id", employeeId);
+      formData.append("candidate.location", location);
+      formData.append("summary_text", editor.getHTML());
+      if (profilePicture instanceof File) {
+        formData.append("candidate.profile_image", profilePicture);
+      }
+      const response = await axios.post(
+        "http://localhost:8000/profiles/summaries/",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      alert("Profile created successfully!");
+    } catch (error) {
+      setErrorMessage(getFriendlyErrorMessage(error));
+      setErrorModalOpen(true);
+    }
   };
-  localStorage.setItem("profileFormData", JSON.stringify(data));
 
   if (!editor) return null;
 
   return (
     <div>
+      {errorModalOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.4)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              padding: 32,
+              borderRadius: 20,
+              minWidth: 320,
+              maxWidth: 480,
+              boxShadow: "0 2px 16px rgba(0,0,0,0.2)",
+            }}
+          >
+            <h2 style={{ color: "#c00", marginTop: 0 }}>Error</h2>
+            <pre
+              style={{
+                whiteSpace: "pre-wrap",
+                color: "#333",
+                fontSize: 16,
+                fontFamily: "Ubuntu",
+              }}
+            >
+              {errorMessage}
+            </pre>
+            <button
+              style={{
+                marginTop: 16,
+                padding: "8px 24px",
+                borderRadius: 15,
+                background: "#007bff",
+                color: "#fff",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "Ubuntu",
+              }}
+              onClick={() => setErrorModalOpen(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
       <h2 className="profile-creation-title">Create Profile</h2>
       <div className="fields-container">
         <div className="fields-wrapper">
@@ -230,7 +350,7 @@ function CreateProfile() {
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
-          <div className="profile-fields">
+          {/* <div className="profile-fields">
             <label className="fields-label" htmlFor="Department">
               Department
             </label>
@@ -240,20 +360,7 @@ function CreateProfile() {
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
             />
-          </div>
-        </div>
-        <div className="fields-wrapper">
-          <div className="profile-fields">
-            <label className="fields-label" htmlFor="EmployeeID">
-              Employee ID
-            </label>
-            <input
-              type="text"
-              className="fields-input"
-              value={employeeId}
-              onChange={(e) => setEmployeeId(e.target.value)}
-            />
-          </div>
+          </div> */}
           <div className="profile-fields">
             <label className="fields-label" htmlFor="Location">
               Location
@@ -263,6 +370,19 @@ function CreateProfile() {
               className="fields-input"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="fields-wrapper2">
+          <div className="profile-fields">
+            <label className="fields-label" htmlFor="EmployeeID">
+              Employee ID
+            </label>
+            <input
+              type="text"
+              className="fields-input"
+              value={employeeId}
+              onChange={(e) => setEmployeeId(e.target.value)}
             />
           </div>
         </div>
@@ -288,9 +408,10 @@ function CreateProfile() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
+                  setProfilePicture(file); // store the File object
                   const reader = new FileReader();
                   reader.onload = () => {
-                    setProfilePicture(reader.result);
+                    setProfilePicturePreview(reader.result); // store the preview
                   };
                   reader.readAsDataURL(file);
                 }
@@ -308,9 +429,9 @@ function CreateProfile() {
                 Add Profile Picture
               </button>
             )}
-            {profilePicture && (
+            {profilePicturePreview && (
               <img
-                src={profilePicture}
+                src={profilePicturePreview}
                 alt="Profile Preview"
                 style={{
                   width: 80,

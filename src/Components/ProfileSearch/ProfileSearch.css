@@ -54,11 +54,18 @@
 .tags {
   background-color: rgb(239 243 248);
   width: 11vh;
+  cursor: pointer;
   padding: 10px;
   border-radius: 50px;
   font-size: 14px;
   text-align: center;
   font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.tags:hover {
+  background-color: #2a4874;
+  color: white;
 }
 
 .profile-list {

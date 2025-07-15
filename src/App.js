@@ -11,7 +11,7 @@ function App() {
       <Routes>
         <Route path="/create-profile" element={<CreateProfile />} />
         <Route path="/search-profile" element={<ProfileSearch />} />
-        <Route path="/update-profile" element={<UpdateProfile />} />
+        <Route path="/update-profile/:id" element={<UpdateProfile />} />
       </Routes>
     </Router>
   );
