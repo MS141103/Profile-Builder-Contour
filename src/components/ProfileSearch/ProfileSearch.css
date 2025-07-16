@@ -84,7 +84,7 @@
 }
 
 .profile-cards {
-  height: 20vh;
+  height: auto;
   width: 25%;
   border-radius: 30px;
   background-color: rgb(239 243 248);

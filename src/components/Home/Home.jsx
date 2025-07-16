@@ -1,4 +1,5 @@
 import "./Home.css";
+import { Link } from "react-router-dom";
 import createProfile from "../../assets/create-profile.png";
 import searchProfile from "../../assets/search-profile.png";
 
@@ -24,7 +25,9 @@ function Home({ isLoggedIn }) {
               Collaboration, and Informed Decision-Making Across the Workforce.
             </h2>
           </div>
-          <a href="" className="text-decoration-none">
+
+          {/* Create Profile Link */}
+          <Link to="/create-profile" className="text-decoration-none">
             <div className="col">
               <div className="card content text-white position-relative text-center hover-card">
                 <div className="icon-circle position-absolute top-0 start-50 translate-middle">
@@ -39,9 +42,10 @@ function Home({ isLoggedIn }) {
                 </div>
               </div>
             </div>
-          </a>
+          </Link>
 
-          <a href="" className="text-decoration-none">
+          {/* Search Profiles Link */}
+          <Link to="/search-profile" className="text-decoration-none">
             <div className="col">
               <div className="card content text-white position-relative text-center hover-card">
                 <div className="icon-circle position-absolute top-0 start-50 translate-middle">
@@ -56,7 +60,7 @@ function Home({ isLoggedIn }) {
                 </div>
               </div>
             </div>
-          </a>
+          </Link>
         </div>
       )}
     </div>

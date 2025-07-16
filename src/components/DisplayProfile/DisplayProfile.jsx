@@ -2,8 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import profileIcon from "../../assets/profile.png";
 import "./DisplayProfile.css";
+import { useParams, useNavigate } from "react-router-dom";
 
-const DisplayProfile = ({ candidateId = 1 }) => {
+const DisplayProfile = () => {
+  const { id: candidateId } = useParams();
+  const navigate = useNavigate();
   const [candidate, setCandidate] = useState(null);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -15,18 +18,16 @@ const DisplayProfile = ({ candidateId = 1 }) => {
       try {
         setLoading(true);
 
-        // Get basic profile info
         const profileRes = await axios.get(
           `${BASE_URL}/profiles/candidates/${candidateId}/`
         );
         const profile = profileRes.data;
 
-        // Get summary versions
         const versionsRes = await axios.get(
           `${BASE_URL}/profiles/summaries/${candidateId}/versions/`
         );
         const summaries = versionsRes.data;
-        console.log(summaries)
+
         const versions = summaries.map((summary, index) => ({
           name: `Version ${summaries.length - index}`,
           disabled: false,
@@ -58,28 +59,26 @@ const DisplayProfile = ({ candidateId = 1 }) => {
   }, [candidateId]);
 
   const handleDownloadPDF = () => {
-  const selectedVersion = candidate.versions[currentVersionIndex];
-  const summaryId = selectedVersion.content.summary_id; // Make sure you store summary_id
+    const selectedVersion = candidate.versions[currentVersionIndex];
 
-  axios({
-    url: `${BASE_URL}/profiles/export_pdf/${candidateId}/`,
-    method: "GET",
-    responseType: "blob", // Important for binary file
-  })
-    .then((response) => {
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `Candidate_${candidateId}_Summary.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+    axios({
+      url: `${BASE_URL}/profiles/export_pdf/${candidateId}/`,
+      method: "GET",
+      responseType: "blob",
     })
-    .catch((error) => {
-      console.error("Error downloading PDF:", error);
-    });
-};
-
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `Candidate_${candidateId}_Summary.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      })
+      .catch((error) => {
+        console.error("Error downloading PDF:", error);
+      });
+  };
 
   if (loading) return <p className="text-center mt-5">Loading profile...</p>;
   if (!candidate) return <p className="text-center mt-5">Profile not found.</p>;
@@ -125,15 +124,18 @@ const DisplayProfile = ({ candidateId = 1 }) => {
               <p className="text-muted">{title}</p>
               <p className="text-muted">{location}</p>
             </div>
-            <div className="ms-auto">
-              <div className="text-muted my-2">Last Updated: {formattedDate}</div>
+            <div className="ms-auto text-end">
+              <div className="text-muted mb-2">Last Updated: {formattedDate}</div>
               <button
                 className="btn btn-outline-primary me-2 fw-bold"
                 onClick={handleDownloadPDF}
               >
                 <i className="bi bi-download m-2"></i>
               </button>
-              <button className="btn btn-primary fw-bold">
+              <button
+                className="btn btn-primary fw-bold"
+                onClick={() => navigate(`/update-profile/${candidateId}`)}
+              >
                 <i className="bi bi-pencil-square m-2"></i>
               </button>
             </div>

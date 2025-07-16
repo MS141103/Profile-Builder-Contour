@@ -95,7 +95,7 @@ function ProfileSearch() {
                   <div className="profile-card-footer">
                     <button
                       className="view-details-btn"
-                      onClick={() => navigate(`/update-profile/${profile.id}`)} // just change the path of the profile details page with the profile-details
+                      onClick={() => navigate(`/display-profile/${profile.id}`)} // just change the path of the profile details page with the profile-details
                     >
                       View Details
                     </button>

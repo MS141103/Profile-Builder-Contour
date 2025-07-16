@@ -55,8 +55,9 @@
 }
 
 .card-title{
-  font-weight: 600;
+  color: white;
 }
+
 .hover-card {
   background-color: rgba(0, 0, 0, 0.5);  
   color: white;                         
