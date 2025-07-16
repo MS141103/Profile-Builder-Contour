@@ -48,59 +48,57 @@ class ExportResumeView(APIView):
     def get(self, request, summary_id):
         try:
             candidate = get_object_or_404(CandidateProfile, id=summary_id)
-            
-            # Create a byte buffer for the PDF
-            buffer = BytesIO()
 
-            # Create the PDF object, using the buffer as its "file"
+            # Try to get profile summary
+            try:
+                summary = candidate.profilesummary.summary_text
+            except ProfileSummary.DoesNotExist:
+                summary = "No profile summary available."
+
+            buffer = BytesIO()
             p = canvas.Canvas(buffer)
 
-            # Write content to the PDF
-            p.setFont("Helvetica", 14)
-            p.drawString(100, 800, f"Candidate Resume: {candidate.name}")
-            p.setFont("Helvetica", 12)
-            p.drawString(100, 770, f"Title: {candidate.title}")
-            p.drawString(100, 750, f"Location: {candidate.location}")
-            p.drawString(100, 730, f"Email: {candidate.email}")
-            p.drawString(100, 710, f"Employee ID: {candidate.employee_id or 'N/A'}")
+            # ==== Draw Profile Image ====
+            if candidate.profile_image:
+                try:
+                    img_path = candidate.profile_image.path
+                    p.drawImage(ImageReader(img_path), 100, 720, width=80, height=80)  # adjust position and size
+                except Exception as e:
+                    print("Image not loaded:", e)
 
-                # Finish up
+            # ==== Write Candidate Info ====
+            p.setFont("Helvetica-Bold", 14)
+            p.drawString(200, 780, f"Candidate Resume: {candidate.name}")  # shifted right for image
+
+            p.setFont("Helvetica", 12)
+            p.drawString(200, 750, f"Title: {candidate.title}")
+            p.drawString(200, 730, f"Location: {candidate.location}")
+            p.drawString(200, 710, f"Email: {candidate.email}")
+            p.drawString(200, 690, f"Employee ID: {candidate.employee_id or 'N/A'}")
+
+            # ==== Profile Summary ====
+            p.setFont("Helvetica-Bold", 12)
+            p.drawString(100, 660, "Profile Summary:")
+
+            p.setFont("Helvetica", 11)
+            text = p.beginText(100, 640)
+            for line in self.wrap_text(summary, 85):
+                text.textLine(line)
+            p.drawText(text)
+
             p.showPage()
             p.save()
-
-                # Move buffer to the beginning
             buffer.seek(0)
 
-            # Return as a FileResponse
             return FileResponse(buffer, as_attachment=True, filename=f"{candidate.name}_resume.pdf")
 
         except CandidateProfile.DoesNotExist:
             return Response({"error": "Candidate not found"}, status=status.HTTP_404_NOT_FOUND)
-'''
-        # Generate dummy PDF path
-        pdf_filename = f"resume_{candidate.id}.pdf"
-        pdf_path = os.path.join(settings.MEDIA_ROOT, pdf_filename)
 
-        # Create dummy PDF file (replace with real rendering in production)
-        with open(pdf_path, 'wb') as f:
-            f.write(b'%PDF-1.4\n% Dummy PDF content for candidate')
-
-        # Save export record
-        if request.user.is_authenticated and hasattr(request.user, 'employee'):
-            PdfExport.objects.create(
-                candidate=candidate,
-                generated_by=request.user.employee,
-                file_path=pdf_path,
-                generated_at=timezone.now()
-            )
-
-        return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
-'''    
-def get(self, request, summary_id):
-        if not request.user.is_staff:
-            return Response({"error": "Unauthorized"}, status=403)
-        return self.post(request, summary_id)
-
+    def wrap_text(self, text, max_width):
+        import textwrap
+        return textwrap.wrap(text, width=max_width)
+        
 def display_images(request):
     images = CandidateProfile.objects.get(name = "profile_image")
     return render(request, 'myapp/image_list.html', {'images':images})
