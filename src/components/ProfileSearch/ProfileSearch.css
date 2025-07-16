@@ -1,0 +1,137 @@
+.profile-search-title {
+  color: #2a4874;
+  width: fit-content;
+  padding: 15px 25px 15px 25px;
+  border-radius: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 1.6%;
+}
+
+.search-bar {
+  background-color: rgb(239 243 248);
+  height: 8.5vh;
+  width: 65%;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  border: none;
+  border-radius: 50px;
+  margin-top: 2.2%;
+  padding-left: 30px;
+  font-family: "Ubuntu";
+  color: #4a4a4a;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.card-pfp {
+  background-color: white;
+  border: 3.5px solid white;
+  border-radius: 50px;
+  height: 8vh;
+  width: 8vh;
+}
+
+.tags-section {
+  display: flex;
+  justify-content: space-between;
+  margin-left: auto;
+  margin-right: auto;
+  width: 63%;
+  margin-top: 1.5%;
+}
+
+.tags-title {
+  font-size: 16px;
+  color: white;
+  background-color: #2a4874;
+  border-radius: 50px;
+  padding: 9px 25px 9px 25px;
+  font-weight: 500;
+}
+
+.tags {
+  background-color: rgb(239 243 248);
+  width: 11vh;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50px;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.tags:hover {
+  background-color: #2a4874;
+  color: white;
+}
+
+.profile-list {
+  width: 65%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2%;
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
+}
+
+.profile-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.profile-cards {
+  height: 20vh;
+  width: 25%;
+  border-radius: 30px;
+  background-color: rgb(239 243 248);
+  padding: 20px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.profile-card-header {
+  display: flex;
+}
+
+.card-title {
+  font-size: 18px;
+  color: #4a4a4a;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.card-desc {
+  font-size: 15px;
+  color: #4a4a4a;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: -5%;
+}
+
+.card-details {
+  margin-top: -2%;
+  margin-left: 7%;
+}
+
+.view-details-btn {
+  background-color: #2a4874;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 15px;
+  font-size: 17px;
+  width: 100%;
+  font-weight: 500;
+  font-family: "Ubuntu";
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.view-details-btn:hover {
+  transform: scale(1.07) translateY(-3px);
+}
