@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
-import {TextStyle} from "@tiptap/extension-text-style";
+import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import TextAlign from "@tiptap/extension-text-align";
 import FontSize from "tiptap-extension-font-size";
@@ -16,8 +16,9 @@ import { FaUnderline } from "react-icons/fa";
 import { PiTextAlignLeftBold } from "react-icons/pi";
 import { PiTextAlignCenterBold } from "react-icons/pi";
 import { PiTextAlignRightBold } from "react-icons/pi";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
- 
+
 function CreateProfile() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -54,12 +55,12 @@ function CreateProfile() {
       },
     },
   });
- 
+
   useEffect(() => {
     if (!editor) return;
     setFontSize(editor.getAttributes("textStyle").fontSize || "16px");
   }, [editor]);
- 
+
   const handleAttachment = (e) => {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
@@ -123,13 +124,13 @@ function CreateProfile() {
       reader.readAsArrayBuffer(file);
     }
   };
- 
+
   const handleFontSizeChange = (e) => {
     const size = e.target.value;
     setFontSize(size);
     editor.chain().focus().setFontSize(size).run();
   };
- 
+
   useEffect(() => {
     if (!editor) return;
     const handler = (e) => {
@@ -144,7 +145,7 @@ function CreateProfile() {
       if (pm) pm.removeEventListener("click", handler);
     };
   }, [editor]);
- 
+
   function flattenErrors(data, fieldMap = {}, parentKey = "") {
     let messages = [];
     for (const [key, value] of Object.entries(data)) {
@@ -159,7 +160,7 @@ function CreateProfile() {
     }
     return messages;
   }
- 
+
   function getFriendlyErrorMessage(error) {
     if (!error.response) {
       return "Could not connect to the server. Please check your internet connection or try again later.";
@@ -213,7 +214,8 @@ function CreateProfile() {
     }
     return "An unknown error occurred. Please try again.";
   }
- 
+  const navigate = useNavigate();
+
   const handleCreateProfile = async () => {
     if (!editor) return;
     if (
@@ -228,7 +230,7 @@ function CreateProfile() {
       setErrorModalOpen(true);
       return;
     }
- 
+
     try {
       const formData = new FormData();
       formData.append("candidate.name", name);
@@ -241,20 +243,21 @@ function CreateProfile() {
       if (profilePicture instanceof File) {
         formData.append("candidate.profile_image", profilePicture);
       }
-      const response = await axios.post(
-        "http://localhost:8000/profiles/summaries/",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      await axios.post("http://localhost:8000/profiles/summaries/", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       alert("Profile created successfully!");
+
+      // ⬇️ Redirect to home
+      navigate("/");
     } catch (error) {
       setErrorMessage(getFriendlyErrorMessage(error));
       setErrorModalOpen(true);
     }
   };
- 
+
   if (!editor) return null;
- 
+
   return (
     <div>
       {errorModalOpen && (
@@ -349,17 +352,7 @@ function CreateProfile() {
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
-          {/* <div className="profile-fields">
-            <label className="fields-label" htmlFor="Department">
-              Department
-            </label>
-            <input
-              type="text"
-              className="fields-input"
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-            />
-          </div> */}
+
           <div className="profile-fields">
             <label className="fields-label" htmlFor="Location">
               Location
@@ -600,5 +593,5 @@ function CreateProfile() {
     </div>
   );
 }
- 
+
 export default CreateProfile;

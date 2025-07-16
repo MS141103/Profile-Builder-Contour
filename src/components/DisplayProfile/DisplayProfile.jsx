@@ -44,7 +44,8 @@ const DisplayProfile = () => {
               ? `${BASE_URL}${profile.profile_image}`
               : profileIcon,
           },
-        }));
+        }
+      ));
 
         setCandidate({ versions });
         setCurrentVersionIndex(0);
@@ -96,10 +97,13 @@ const DisplayProfile = () => {
     img,
   } = selectedVersion.content;
 
-  const formattedDate = new Date(updated_at).toLocaleString("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  const formattedDate = updated_at && !isNaN(new Date(updated_at))
+  ? new Date(updated_at).toLocaleString("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    })
+  : "Unknown";
+
 
   return (
     <div className="container my-5">
