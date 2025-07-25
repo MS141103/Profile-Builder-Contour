@@ -2,37 +2,56 @@ import React, { useState, useRef, useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
-import TextStyle from "@tiptap/extension-text-style";
+import {TextStyle} from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import TextAlign from "@tiptap/extension-text-align";
 import FontSize from "tiptap-extension-font-size";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import "./UpdateProfile.css";
-import { FaFont, FaPaperclip } from "react-icons/fa";
+import { FaFont, FaPaperclip, FaEdit } from "react-icons/fa";
 import { MdOutlineFormatBold } from "react-icons/md";
-import { FaItalic } from "react-icons/fa";
-import { FaUnderline } from "react-icons/fa";
-import { PiTextAlignLeftBold } from "react-icons/pi";
-import { PiTextAlignCenterBold } from "react-icons/pi";
-import { PiTextAlignRightBold } from "react-icons/pi";
+import { FaItalic, FaUnderline } from "react-icons/fa";
+import {
+  PiTextAlignLeftBold,
+  PiTextAlignCenterBold,
+  PiTextAlignRightBold,
+} from "react-icons/pi";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 
 function UpdateProfile() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [title, setTitle] = useState("");
-  const [department, setDepartment] = useState("");
-  const [employeeId, setEmployeeId] = useState("");
-  const [location, setLocation] = useState("");
+  const [fields, setFields] = useState({
+    name: "",
+    email: "",
+    title: "",
+    department: "",
+    employeeId: "",
+    location: "",
+  });
+  const [editMode, setEditMode] = useState({
+    name: false,
+    email: false,
+    title: false,
+    department: false,
+    employeeId: false,
+    location: false,
+    editor: false,
+    profilePicture: false,
+  });
   const [profilePicture, setProfilePicture] = useState(null);
-  const [profilePicturePreview, setProfilePicturePreview] = useState(null); // base64 string or backend URL
+  const [profilePicturePreview, setProfilePicturePreview] = useState(null);
   const [fontSize, setFontSize] = useState("16px");
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [errorMsg, setErrorMsg] = useState("");
   const { id } = useParams();
+  const [originalFields, setOriginalFields] = useState(null);
+  const [originalSummary, setOriginalSummary] = useState("");
+  const [originalProfilePicture, setOriginalProfilePicture] = useState(null);
 
   const editor = useEditor({
     extensions: [
@@ -50,6 +69,7 @@ function UpdateProfile() {
       Link.configure({ openOnClick: false }),
     ],
     content: "",
+    editable: false,
     editorProps: {
       attributes: {
         class: "ProseMirror tiptap-editor-custom",
@@ -64,14 +84,21 @@ function UpdateProfile() {
           `http://localhost:8000/profiles/summaries/${id}/`
         );
         const profile = response.data;
-        setName(profile.candidate.name || "");
-        setEmail(profile.candidate.email || "");
-        setTitle(profile.candidate.title || "");
-        setDepartment(profile.candidate.department || "");
-        setEmployeeId(profile.candidate.employee_id || "");
-        setLocation(profile.candidate.location || "");
-        setProfilePicture(null); // always null on fetch
-        setProfilePicturePreview(profile.candidate.profile_image || null); // backend URL
+
+        const loadedFields = {
+          name: profile.candidate?.name || "",
+          email: profile.candidate?.email || "",
+          title: profile.candidate?.title || "",
+          department: profile.candidate?.department || "",
+          employeeId: profile.candidate?.employee_id || "",
+          location: profile.candidate?.location || "",
+        };
+        setFields(loadedFields);
+        setOriginalFields(loadedFields);
+        setOriginalSummary(profile.summary_text || "");
+        setProfilePicturePreview(profile.candidate?.profile_image || null);
+        setOriginalProfilePicture(profile.candidate?.profile_image || null);
+
         if (editor && profile.summary_text) {
           editor.commands.setContent(profile.summary_text, "html");
         }
@@ -88,6 +115,12 @@ function UpdateProfile() {
     if (!editor) return;
     setFontSize(editor.getAttributes("textStyle").fontSize || "16px");
   }, [editor]);
+
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(editMode.editor);
+    }
+  }, [editor, editMode.editor]);
 
   const handleAttachment = (e) => {
     const file = e.target.files?.[0];
@@ -159,47 +192,117 @@ function UpdateProfile() {
     editor.chain().focus().setFontSize(size).run();
   };
 
-  useEffect(() => {
-    if (!editor) return;
-    const handler = (e) => {
-      const a = e.target.closest("a");
-      if (a && a.href) {
-        e.preventDefault();
-      }
-    };
-    const pm = document.querySelector(".editor .ProseMirror");
-    if (pm) pm.addEventListener("click", handler);
-    return () => {
-      if (pm) pm.removeEventListener("click", handler);
-    };
-  }, [editor]);
+  const handleFieldChange = (field, value) => {
+    setFields((prev) => ({ ...prev, [field]: value }));
+  };
 
+  const handleEditToggle = (field) => {
+    setEditMode((prev) => ({ ...prev, [field]: !prev[field] }));
+    if (field === "editor" && editor) {
+      editor.setEditable(!editMode.editor);
+    }
+  };
+
+  const handleProfilePictureChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfilePicture(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setProfilePicturePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  const navigate = useNavigate();
   const handleUpdateProfile = async () => {
+    setErrorMsg("");
     if (!id) {
-      alert("No valid profile to update.");
+      setErrorMsg("No valid profile to update.");
       return;
     }
-    try {
-      const formData = new FormData();
-      formData.append("candidate.name", name);
-      formData.append("candidate.email", email);
-      formData.append("candidate.title", title);
-      formData.append("candidate.department", department); // always append department
-      formData.append("candidate.employee_id", employeeId);
-      formData.append("candidate.location", location);
-      formData.append("summary_text", editor.getHTML());
-      if (profilePicture instanceof File) {
-        formData.append("candidate.profile_image", profilePicture);
+
+    let changedCandidate = {};
+    Object.keys(fields).forEach((key) => {
+      if (fields[key] !== originalFields[key]) {
+        if (key === "employeeId") {
+          changedCandidate["employee_id"] = fields[key];
+        } else {
+          changedCandidate[key] = fields[key];
+        }
       }
-      await axios.patch(
-        `http://localhost:8000/profiles/summaries/${id}/`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+    });
+
+    const summaryText = editor.getHTML();
+    const summaryChanged = summaryText !== originalSummary;
+    const profilePicChanged = profilePicture instanceof File;
+
+    if (
+      Object.keys(changedCandidate).length === 0 &&
+      !summaryChanged &&
+      !profilePicChanged
+    ) {
+      setErrorMsg("No changes to update.");
+      return;
+    }
+
+    try {
+      if (profilePicChanged) {
+        // Use FormData for file upload
+        const formData = new FormData();
+        Object.entries(changedCandidate).forEach(([key, value]) => {
+          formData.append(`candidate.${key}`, value);
+        });
+        if (summaryChanged) {
+          formData.append("summary_text", summaryText);
+        }
+        formData.append("candidate.profile_image", profilePicture);
+        await axios.patch(
+          `http://localhost:8000/profiles/summaries/${id}/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+      } else {
+        // Use JSON for non-file updates
+        let payload = {};
+        if (Object.keys(changedCandidate).length > 0) {
+          payload.candidate = changedCandidate;
+        }
+        if (summaryChanged) {
+          payload.summary_text = summaryText;
+        }
+        await axios.patch(
+          `http://localhost:8000/profiles/summaries/${id}/`,
+          payload,
+          { headers: { "Content-Type": "application/json" } }
+        );
+      }
       alert("Profile updated successfully!");
+      navigate(`/display-profile/${id}`); 
+      setOriginalFields({ ...fields });
+      setOriginalSummary(summaryText);
+      setProfilePicture(null);
+      setOriginalProfilePicture(profilePicturePreview);
+      setEditMode({
+        name: false,
+        email: false,
+        title: false,
+        department: false,
+        employeeId: false,
+        location: false,
+        editor: false,
+        profilePicture: false,
+      });
+      if (editor) editor.setEditable(false);
     } catch (err) {
-      console.log("Update error:", err.response?.data || err.message);
-      alert("Failed to update profile. Check console for details.");
+      const data = err.response?.data;
+      if (data?.candidate?.email?.[0]) {
+        setErrorMsg(data.candidate.email[0]);
+      } else if (typeof data === "string") {
+        setErrorMsg(data);
+      } else {
+        setErrorMsg("Failed to update profile.");
+      }
     }
   };
 
@@ -208,28 +311,49 @@ function UpdateProfile() {
   return (
     <div>
       <h2 className="profile-creation-title">Update Profile</h2>
+      {errorMsg && (
+        <div style={{ color: "red", marginBottom: 10, fontWeight: 500 }}>
+          {errorMsg}
+        </div>
+      )}
       <div className="fields-container">
         <div className="fields-wrapper">
           <div className="profile-fields">
             <label className="fields-label" htmlFor="Name">
               Name
+              <FaEdit
+                className="edit-icon"
+                style={{ marginLeft: 8, cursor: "pointer" }}
+                onClick={() => handleEditToggle("name")}
+                title={editMode.name ? "Lock" : "Edit"}
+              />
             </label>
             <input
               type="text"
               className="fields-input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={fields.name}
+              onChange={(e) => handleFieldChange("name", e.target.value)}
+              readOnly={!editMode.name}
+              style={{ color: editMode.name ? "#000000" : "#777" }}
             />
           </div>
           <div className="profile-fields">
             <label className="fields-label" htmlFor="Email">
               Email
+              <FaEdit
+                className="edit-icon"
+                style={{ marginLeft: 8, cursor: "pointer" }}
+                onClick={() => handleEditToggle("email")}
+                title={editMode.email ? "Lock" : "Edit"}
+              />
             </label>
             <input
               type="text"
               className="fields-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={fields.email}
+              onChange={(e) => handleFieldChange("email", e.target.value)}
+              readOnly={!editMode.email}
+              style={{ color: editMode.email ? "#000000" : "#777" }}
             />
           </div>
         </div>
@@ -237,23 +361,39 @@ function UpdateProfile() {
           <div className="profile-fields">
             <label className="fields-label" htmlFor="Title">
               Title
+              <FaEdit
+                className="edit-icon"
+                style={{ marginLeft: 8, cursor: "pointer" }}
+                onClick={() => handleEditToggle("title")}
+                title={editMode.title ? "Lock" : "Edit"}
+              />
             </label>
             <input
               type="text"
               className="fields-input"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={fields.title}
+              onChange={(e) => handleFieldChange("title", e.target.value)}
+              readOnly={!editMode.title}
+              style={{ color: editMode.title ? "#000000" : "#777" }}
             />
           </div>
           <div className="profile-fields">
             <label className="fields-label" htmlFor="Location">
               Location
+              <FaEdit
+                className="edit-icon"
+                style={{ marginLeft: 8, cursor: "pointer" }}
+                onClick={() => handleEditToggle("location")}
+                title={editMode.location ? "Lock" : "Edit"}
+              />
             </label>
             <input
               type="text"
               className="fields-input"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              value={fields.location}
+              onChange={(e) => handleFieldChange("location", e.target.value)}
+              readOnly={!editMode.location}
+              style={{ color: editMode.location ? "#000000" : "#777" }}
             />
           </div>
         </div>
@@ -261,12 +401,20 @@ function UpdateProfile() {
           <div className="profile-fields">
             <label className="fields-label" htmlFor="EmployeeID">
               Employee ID
+              <FaEdit
+                className="edit-icon"
+                style={{ marginLeft: 8, cursor: "pointer" }}
+                onClick={() => handleEditToggle("employeeId")}
+                title={editMode.employeeId ? "Lock" : "Edit"}
+              />
             </label>
             <input
               type="text"
               className="fields-input"
-              value={employeeId}
-              onChange={(e) => setEmployeeId(e.target.value)}
+              value={fields.employeeId}
+              onChange={(e) => handleFieldChange("employeeId", e.target.value)}
+              readOnly={!editMode.employeeId}
+              style={{ color: editMode.employeeId ? "#000000" : "#777" }}
             />
           </div>
         </div>
@@ -281,18 +429,12 @@ function UpdateProfile() {
             }}
           >
             Add Profile Picture
-            {profilePicturePreview && (
-              <button
-                className="add-pfp2"
-                type="button"
-                onClick={() =>
-                  document.getElementById("profile-picture-input").click()
-                }
-                style={{ marginLeft: "auto", marginRight: 0 }}
-              >
-                Update
-              </button>
-            )}
+            <FaEdit
+              className="edit-icon"
+              style={{ marginLeft: 8, cursor: "pointer" }}
+              onClick={() => handleEditToggle("profilePicture")}
+              title={editMode.profilePicture ? "Lock" : "Edit"}
+            />
           </label>
           <div
             className="pfp-input pfpinput-2"
@@ -309,26 +451,19 @@ function UpdateProfile() {
               accept="image/*"
               style={{ display: "none" }}
               id="profile-picture-input"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setProfilePicture(file); // store the File object
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    setProfilePicturePreview(reader.result); // store the preview
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }}
+              onChange={handleProfilePictureChange}
+              disabled={!editMode.profilePicture}
             />
             {!profilePicturePreview && (
               <button
                 className="add-pfp"
                 type="button"
                 onClick={() =>
+                  editMode.profilePicture &&
                   document.getElementById("profile-picture-input").click()
                 }
                 style={{ margin: 0 }}
+                disabled={!editMode.profilePicture}
               >
                 Add Profile Picture
               </button>
@@ -345,18 +480,33 @@ function UpdateProfile() {
                   objectFit: "cover",
                   display: "block",
                 }}
+                onClick={() =>
+                  editMode.profilePicture &&
+                  document.getElementById("profile-picture-input").click()
+                }
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: "50%",
+                  margin: 0,
+                  objectFit: "cover",
+                  display: "block",
+                  cursor: editMode.profilePicture ? "pointer" : "default",
+                  opacity: editMode.profilePicture ? 1 : 0.7,
+                }}
               />
             )}
           </div>
         </div>
       </div>
       <div className="editor-container">
-        <div className="editor">
+        <div className="editor" style={{ position: "relative" }}>
           <div className="toolbar">
             <button
               onClick={() => editor.chain().focus().toggleBold().run()}
               className={editor.isActive("bold") ? "active" : ""}
               type="button"
+              disabled={!editMode.editor}
             >
               <MdOutlineFormatBold
                 className="toolbar-btns"
@@ -367,6 +517,7 @@ function UpdateProfile() {
               onClick={() => editor.chain().focus().toggleItalic().run()}
               className={editor.isActive("italic") ? "active" : ""}
               type="button"
+              disabled={!editMode.editor}
             >
               <FaItalic className="toolbar-btns" />
             </button>
@@ -374,6 +525,7 @@ function UpdateProfile() {
               onClick={() => editor.chain().focus().toggleUnderline().run()}
               className={editor.isActive("underline") ? "active" : ""}
               type="button"
+              disabled={!editMode.editor}
             >
               <FaUnderline className="toolbar-btns" />
             </button>
@@ -381,6 +533,7 @@ function UpdateProfile() {
               value={fontSize}
               onChange={handleFontSizeChange}
               className="fontsize-option"
+              disabled={!editMode.editor}
             >
               <option value="12px">12</option>
               <option value="16px">16</option>
@@ -391,10 +544,12 @@ function UpdateProfile() {
             <div
               className="font-color"
               onClick={() => {
+                if (!editMode.editor) return;
                 const colorInput =
                   document.getElementById("color-picker-input");
                 if (colorInput) colorInput.click();
               }}
+              style={{ opacity: editMode.editor ? 1 : 0.5 }}
             >
               <button
                 type="button"
@@ -403,13 +558,14 @@ function UpdateProfile() {
                 style={{
                   background: "none",
                   border: "none",
-                  cursor: "pointer",
+                  cursor: editMode.editor ? "pointer" : "not-allowed",
                   padding: 0,
                   marginLeft: 0,
                   marginBottom: "-10px",
                   marginTop: "-1.5px",
                   fontSize: 15,
                 }}
+                disabled={!editMode.editor}
               >
                 <FaFont />
               </button>
@@ -420,6 +576,7 @@ function UpdateProfile() {
                 onChange={(e) =>
                   editor.chain().focus().setColor(e.target.value).run()
                 }
+                disabled={!editMode.editor}
               />
               <div style={{ marginTop: 0, marginBottom: "-8px" }}>
                 <span
@@ -440,6 +597,7 @@ function UpdateProfile() {
               onClick={() => editor.chain().focus().setTextAlign("left").run()}
               type="button"
               className={editor.isActive({ textAlign: "left" }) ? "active" : ""}
+              disabled={!editMode.editor}
             >
               <PiTextAlignLeftBold
                 className="toolbar-btns"
@@ -454,6 +612,7 @@ function UpdateProfile() {
               className={
                 editor.isActive({ textAlign: "center" }) ? "active" : ""
               }
+              disabled={!editMode.editor}
             >
               <PiTextAlignCenterBold
                 className="toolbar-btns"
@@ -466,6 +625,7 @@ function UpdateProfile() {
               className={
                 editor.isActive({ textAlign: "right" }) ? "active" : ""
               }
+              disabled={!editMode.editor}
             >
               <PiTextAlignRightBold
                 className="toolbar-btns"
@@ -476,9 +636,12 @@ function UpdateProfile() {
               type="button"
               className="attachment-btn"
               onClick={() =>
-                fileInputRef.current && fileInputRef.current.click()
+                editMode.editor &&
+                fileInputRef.current &&
+                fileInputRef.current.click()
               }
               title="Insert Attachment"
+              disabled={!editMode.editor}
             >
               <FaPaperclip style={{ fontSize: 18 }} />
             </button>
@@ -487,9 +650,29 @@ function UpdateProfile() {
               ref={fileInputRef}
               style={{ display: "none" }}
               onChange={handleAttachment}
+              disabled={!editMode.editor}
             />
           </div>
-          <EditorContent editor={editor} className="editor" />
+          <FaEdit
+            className="edit-icon"
+            style={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              cursor: "pointer",
+              zIndex: 2,
+              color: editMode.editor ? "#007bff" : "#888",
+            }}
+            onClick={() => handleEditToggle("editor")}
+            title={editMode.editor ? "Lock" : "Edit"}
+          />
+          <EditorContent
+            editor={editor}
+            className="editor"
+            style={{
+              color: editMode.editor ? "#222" : "#888",
+            }}
+          />
         </div>
       </div>
       <div className="profile-footer">

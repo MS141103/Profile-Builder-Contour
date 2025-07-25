@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
-import TextStyle from "@tiptap/extension-text-style";
+import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import TextAlign from "@tiptap/extension-text-align";
 import FontSize from "tiptap-extension-font-size";
@@ -16,6 +16,7 @@ import { FaUnderline } from "react-icons/fa";
 import { PiTextAlignLeftBold } from "react-icons/pi";
 import { PiTextAlignCenterBold } from "react-icons/pi";
 import { PiTextAlignRightBold } from "react-icons/pi";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function CreateProfile() {
@@ -26,7 +27,7 @@ function CreateProfile() {
   const [employeeId, setEmployeeId] = useState("");
   const [location, setLocation] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
-  const [profilePicturePreview, setProfilePicturePreview] = useState(null); // base64 string or backend URL
+  const [profilePicturePreview, setProfilePicturePreview] = useState(null);
   const [fontSize, setFontSize] = useState("16px");
   const [profilePictureFile, setProfilePictureFile] = useState(null);
   const fileInputRef = useRef(null);
@@ -152,7 +153,6 @@ function CreateProfile() {
       if (Array.isArray(value)) {
         messages.push(`${displayKey}: ${value.join(", ")}`);
       } else if (typeof value === "object" && value !== null) {
-        // Recursively flatten nested errors
         messages = messages.concat(flattenErrors(value, fieldMap, key));
       } else {
         messages.push(`${displayKey}: ${value}`);
@@ -214,6 +214,7 @@ function CreateProfile() {
     }
     return "An unknown error occurred. Please try again.";
   }
+  const navigate = useNavigate();
 
   const handleCreateProfile = async () => {
     if (!editor) return;
@@ -235,19 +236,20 @@ function CreateProfile() {
       formData.append("candidate.name", name);
       formData.append("candidate.email", email);
       formData.append("candidate.title", title);
-      formData.append("candidate.department", department); // always append department
+      formData.append("candidate.department", department);
       formData.append("candidate.employee_id", employeeId);
       formData.append("candidate.location", location);
       formData.append("summary_text", editor.getHTML());
       if (profilePicture instanceof File) {
         formData.append("candidate.profile_image", profilePicture);
       }
-      const response = await axios.post(
-        "http://localhost:8000/profiles/summaries/",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      await axios.post("http://localhost:8000/profiles/summaries/", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       alert("Profile created successfully!");
+
+      // ⬇️ Redirect to home
+      navigate("/");
     } catch (error) {
       setErrorMessage(getFriendlyErrorMessage(error));
       setErrorModalOpen(true);
@@ -350,17 +352,7 @@ function CreateProfile() {
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
-          {/* <div className="profile-fields">
-            <label className="fields-label" htmlFor="Department">
-              Department
-            </label>
-            <input
-              type="text"
-              className="fields-input"
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-            />
-          </div> */}
+
           <div className="profile-fields">
             <label className="fields-label" htmlFor="Location">
               Location
@@ -408,10 +400,10 @@ function CreateProfile() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  setProfilePicture(file); // store the File object
+                  setProfilePicture(file);
                   const reader = new FileReader();
                   reader.onload = () => {
-                    setProfilePicturePreview(reader.result); // store the preview
+                    setProfilePicturePreview(reader.result);
                   };
                   reader.readAsDataURL(file);
                 }

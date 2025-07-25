@@ -68,7 +68,7 @@ function ProfileSearch() {
                 <div
                   className="profile-cards"
                   key={profile.id || idx}
-                  style={{ flex: "1 1 0", maxWidth: "25.5%" }}
+                  style={{ flex: "1 1 0", maxWidth: "30%" }}
                 >
                   <div className="profile-card-header">
                     <img
@@ -95,7 +95,7 @@ function ProfileSearch() {
                   <div className="profile-card-footer">
                     <button
                       className="view-details-btn"
-                      onClick={() => navigate(`/update-profile/${profile.id}`)} // just change the path of the profile details page with the profile-details
+                      onClick={() => navigate(`/display-profile/${profile.id}`)} // just change the path of the profile details page with the profile-details
                     >
                       View Details
                     </button>
