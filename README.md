@@ -48,7 +48,7 @@ Set-Up instructions: (run on command prompt)
 Environment Variables:
 
       (check settings.py this should be preset)
-      SECRET_KEY=Jagdpanther8.8CMKWK
+      SECRET_KEY= 'you-secret-key'
       DEBUG=True
       DATABASE_URL=postgres://user:pass@localhost:5432/candidate_profiles_db
 
