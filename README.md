@@ -212,7 +212,7 @@ Frontend:
 
 11. Default Admin Credentials
 ----------------------------
-should be the same as the one used to setup the POSTGRES SQL server on your machine (check database branch readme for more information on)
+should be the same as the one used to setup the POSTGRES SQL server on your machine
 username: 
 password: 
     HTML/CSS/JavaScript: Admin templates, frontend views
