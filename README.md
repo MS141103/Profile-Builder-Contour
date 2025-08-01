@@ -212,8 +212,9 @@ Frontend:
 
 11. Default Admin Credentials
 ----------------------------
-username: muaaz
-password: Jagdpanther8.8CMKWK
+should be the same as the one used to setup the POSTGRES SQL server on your machine (check database branch readme for more information on)
+username: 
+password: 
     HTML/CSS/JavaScript: Admin templates, frontend views
     
     Axios: Frontend API calls (planned)
