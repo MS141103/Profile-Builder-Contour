@@ -221,4 +221,5 @@ password:
 
 VIDEO DEMONSTRATION
 
-https://constellationhbs-my.sharepoint.com/:v:/g/personal/qurat-ul-ain_akhter_contour-software_com/EYxr20HA47RAsonzfkecLwgBdHyRPdgOE3Ap42YXZHTyKQ
+
+The video is included as a file to view and a setup guide for postgres SQL
