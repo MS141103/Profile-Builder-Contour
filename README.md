@@ -222,4 +222,4 @@ password:
 VIDEO DEMONSTRATION
 
 
-The video is included as a zip file to view at "Profile Builder and 1 more page - Work - Microsoft_ Edge 2025-07-31 16-46-54.zip" and a setup guide for postgres SQL
+The video is included as a zip file to view at "Profile Builder and 1 more page - Work - Microsoft_ Edge 2025-07-31 16-46-54.zip", click view raw to download the zip and a setup guide for postgres SQL
