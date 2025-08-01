@@ -1,0 +1,50 @@
+
+🛠️ PostgreSQL Setup Guide
+
+To run this project using PostgreSQL as the database, follow these steps:
+
+1. Install PostgreSQL
+----------------------
+Download and install PostgreSQL for your operating system:
+→ https://www.postgresql.org/download/
+
+During installation:
+- Set a password for the default 'postgres' user (e.g. 'admin')
+- Note the port (default is 5432)
+- Optionally, install pgAdmin for a GUI to manage your databases
+
+2. Create the Database
+----------------------
+
+Option A: Using psql CLI:
+-------------------------
+$ psql -U postgres
+
+Then run the following commands:
+CREATE DATABASE candidate_profiles_db;
+CREATE USER myuser WITH PASSWORD 'mypassword';
+GRANT ALL PRIVILEGES ON DATABASE candidate_profiles_db TO myuser;
+
+Option B: Using pgAdmin:
+------------------------
+- Open pgAdmin
+- Right-click on "Databases" → Create → Database
+- Name it: candidate_profiles_db
+- Create a user with password and grant full access
+
+3. Update DATABASE_URL in Django settings
+-----------------------------------------
+In settings.py or your environment variable configuration:
+
+DATABASE_URL=postgres://myuser:mypassword@localhost:5432/candidate_profiles_db
+
+4. Apply Migrations
+-------------------
+$ python manage.py makemigrations
+$ python manage.py migrate
+
+5. Run the Development Server
+-----------------------------
+$ python manage.py runserver
+
+Visit http://127.0.0.1:8000/admin to access the admin dashboard.
